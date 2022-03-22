@@ -26,6 +26,18 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
       appBar: AppBar(
         title: const Text('My Shop'),
         actions: <Widget>[
+          Consumer<Cart>(
+            builder: (_, cart, excludedChild) => CartBadge(
+              child: excludedChild!,
+              value: cart.itemCount.toString(),
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.shopping_cart),
+              onPressed: () {
+                Navigator.of(context).pushNamed(CartScreen.routeName);
+              },
+            ),
+          ),
           PopupMenuButton(
             itemBuilder: (_) => [
               const PopupMenuItem(
@@ -47,18 +59,6 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
                 }
               });
             },
-          ),
-          Consumer<Cart>(
-            builder: (_, cart, excludedChild) => CartBadge(
-              child: excludedChild!,
-              value: cart.itemCount.toString(),
-            ),
-            child: IconButton(
-              icon: const Icon(Icons.shopping_cart),
-              onPressed: () {
-                Navigator.of(context).pushNamed(CartScreen.routeName);
-              },
-            ),
           ),
         ],
       ),
