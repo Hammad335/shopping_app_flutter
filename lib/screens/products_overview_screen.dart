@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:shopping_app/providers/products.dart';
 import 'package:shopping_app/screens/cart_screen.dart';
@@ -19,6 +21,22 @@ class ProductsOverviewScreen extends StatefulWidget {
 
 class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
   var _showFavorites = false;
+  var _isLoading = true;
+
+  @override
+  void initState() {
+    Provider.of<Products>(context, listen: false)
+        .fetchAndSetProducts()
+        .then((_) {
+      setState(() {
+        _isLoading = false;
+      });
+    }).catchError((exception) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(exception.toString())));
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +81,11 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
         ],
       ),
       drawer: AppDrawer(),
-      body: ProductsWidget(showFavorites: _showFavorites),
+      body: _isLoading
+          ? const Center(
+              child: CircularProgressIndicator(),
+            )
+          : ProductsWidget(showFavorites: _showFavorites),
     );
   }
 }

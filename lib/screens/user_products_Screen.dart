@@ -19,28 +19,41 @@ class UserProductScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: () {
-              Navigator.of(context).pushNamed(EditProductScreen.routeName);
+              Navigator.of(context)
+                  .pushNamed(EditProductScreen.routeName, arguments: '');
             },
           ),
         ],
       ),
       drawer: AppDrawer(),
-      body: Padding(
-        padding: const EdgeInsets.all(8),
-        child: ListView.builder(
-          itemCount: productsData.getAllProducts.length,
-          itemBuilder: (context, index) => Column(
-            children: [
-              UserProductItem(
-                id: productsData.getAllProducts[index].id,
-                title: productsData.getAllProducts[index].title,
-                imageUrl: productsData.getAllProducts[index].imageUrl,
-              ),
-              const Divider(),
-            ],
+      body: RefreshIndicator(
+        onRefresh: () => _refreshProducts(context),
+        child: Padding(
+          padding: const EdgeInsets.all(8),
+          child: ListView.builder(
+            itemCount: productsData.getAllProducts.length,
+            itemBuilder: (context, index) => Column(
+              children: [
+                UserProductItem(
+                  id: productsData.getAllProducts[index].id,
+                  title: productsData.getAllProducts[index].title,
+                  imageUrl: productsData.getAllProducts[index].imageUrl,
+                ),
+                const Divider(),
+              ],
+            ),
           ),
         ),
       ),
     );
+  }
+
+  Future<void> _refreshProducts(BuildContext context) async {
+    try {
+      await Provider.of<Products>(context, listen: false).fetchAndSetProducts();
+    } catch (exception) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(exception.toString())));
+    }
   }
 }
