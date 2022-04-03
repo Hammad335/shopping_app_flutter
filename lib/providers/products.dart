@@ -54,13 +54,15 @@ class Products with ChangeNotifier {
   }
 
   Future<void> fetchAndSetProducts() async {
+    if (_items.isNotEmpty) {
+      return;
+    }
     final url = Uri.parse(
         'https://shopping-app-flutter-ee2b9-default-rtdb.firebaseio.com/products.json');
     try {
-      final response = await http.get(url).timeout(const Duration(seconds: 10),
-          onTimeout: () {
-        throw Exception('Slow internet connection, try again later');
-      });
+      final response = await http.get(url).timeout(
+            const Duration(seconds: 10),
+          );
       final extractedData = json.decode(response.body) as Map<String, dynamic>;
       final List<Product> loadedProducts = [];
       extractedData.forEach((productId, productData) {
@@ -77,6 +79,8 @@ class Products with ChangeNotifier {
       });
       _items = loadedProducts;
       notifyListeners();
+    } on TimeoutException {
+      throw Exception('Slow internet connection, try again later');
     } catch (exception) {
       rethrow;
     }
@@ -144,8 +148,23 @@ class Products with ChangeNotifier {
     }
   }
 
-  void deleteProduct(String productId) {
-    _items.removeWhere((product) => product.id == productId);
+  Future<void> deleteProduct(String productId) async {
+    final url = Uri.parse(
+        'https://shopping-app-flutter-ee2b9-default-rtdb.firebaseio.com/products/$productId.json');
+
+    try {
+      final response =
+          await http.delete(url).timeout(const Duration(seconds: 10));
+      if (response.statusCode >= 400) {
+        throw Exception(
+            'Something went wrong try again later. Status Code: ${response.statusCode}');
+      }
+      _items.removeWhere((product) => product.id == productId);
+    } on TimeoutException {
+      throw Exception('Slow internet connection, try again later.');
+    } catch (exception) {
+      rethrow;
+    }
     notifyListeners();
   }
 }

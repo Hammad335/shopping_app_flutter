@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:shopping_app/providers/products.dart';
 import 'package:shopping_app/screens/cart_screen.dart';
@@ -25,16 +24,7 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
 
   @override
   void initState() {
-    Provider.of<Products>(context, listen: false)
-        .fetchAndSetProducts()
-        .then((_) {
-      setState(() {
-        _isLoading = false;
-      });
-    }).catchError((exception) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(exception.toString())));
-    });
+    _fetchAndSetData();
     super.initState();
   }
 
@@ -87,6 +77,35 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
             )
           : ProductsWidget(showFavorites: _showFavorites),
     );
+  }
+
+  void _fetchAndSetData() {
+    setState(() {
+      _isLoading = true;
+    });
+    Provider.of<Products>(context, listen: false)
+        .fetchAndSetProducts()
+        .then((_) {
+      setState(() {
+        _isLoading = false;
+      });
+    }).catchError((exception) {
+      setState(() {
+        _isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(exception.toString()),
+          duration: const Duration(minutes: Duration.minutesPerDay),
+          action: SnackBarAction(
+            label: 'Retry',
+            onPressed: () {
+              _fetchAndSetData();
+            },
+          ),
+        ),
+      );
+    });
   }
 }
 

@@ -253,7 +253,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
         context: context,
         builder: (ctx) {
           return AlertDialog(
-            title: const Text('An Error Occured'),
+            title: const Text('An Error Occurred'),
             content: Text(exception.toString()),
             actions: [
               TextButton(
