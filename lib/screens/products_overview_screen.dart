@@ -49,7 +49,7 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
           PopupMenuButton(
             itemBuilder: (_) => [
               const PopupMenuItem(
-                child: Text('Only Favoites'),
+                child: Text('Only Favorites'),
                 value: FilterOption.Favorites,
               ),
               const PopupMenuItem(
