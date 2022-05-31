@@ -70,21 +70,23 @@ class Products with ChangeNotifier {
       final List<Product> loadedProducts = [];
       extractedData.forEach((productId, productData) {
         loadedProducts.insert(
-            0,
-            Product(
-              id: productId,
-              title: productData['title'],
-              description: productData['description'],
-              price: productData['price'],
-              isFavorite: productData['isFavorite'],
-              imageUrl: productData['imageUrl'],
-            ));
+          0,
+          Product(
+            id: productId.toString(),
+            title: productData['title'],
+            description: productData['description'],
+            price: productData['price'],
+            isFavorite: productData['isFavorite'],
+            imageUrl: productData['imageUrl'],
+          ),
+        );
       });
       _items = loadedProducts;
       notifyListeners();
     } on TimeoutException {
       throw Exception('Slow internet connection, try again later');
     } catch (exception) {
+      print(exception.toString());
       rethrow;
     }
   }

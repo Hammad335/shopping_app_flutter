@@ -24,7 +24,7 @@ class OrdersScreen extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           } else {
             if (dataSnapshot.hasError) {
-              WidgetsBinding.instance?.addPostFrameCallback(
+              WidgetsBinding.instance.addPostFrameCallback(
                 (_) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
