@@ -19,15 +19,18 @@ class OrderItem {
 }
 
 class Orders with ChangeNotifier {
-  List<OrderItem> _orders = [];
+  List<OrderItem> orders = [];
+  final String? authToken;
+
+  Orders({this.authToken, required this.orders});
 
   List<OrderItem> get getOrderItems {
-    return [..._orders];
+    return [...orders];
   }
 
   Future<void> addOrder(List<cart.CartItem> cartItems, double total) async {
     final url = Uri.parse(
-        'https://shopping-app-flutter-ee2b9-default-rtdb.firebaseio.com/orders.json');
+        'https://shopping-app-flutter-ee2b9-default-rtdb.firebaseio.com/orders.json?auth=$authToken');
     final timeStamp = DateTime.now();
     final response = await http
         .post(url,
@@ -47,7 +50,7 @@ class Orders with ChangeNotifier {
       throw Exception('Slow internet connection, try again later');
     });
 
-    _orders.insert(
+    orders.insert(
       0,
       OrderItem(
         orderId: json.decode(response.body)['name'],
@@ -60,11 +63,11 @@ class Orders with ChangeNotifier {
   }
 
   Future<void> fetchAndSetOrders() async {
-    if (_orders.isNotEmpty) {
+    if (orders.isNotEmpty) {
       return;
     }
     final url = Uri.parse(
-        'https://shopping-app-flutter-ee2b9-default-rtdb.firebaseio.com/orders.json');
+        'https://shopping-app-flutter-ee2b9-default-rtdb.firebaseio.com/orders.json?auth=$authToken');
     final response =
         await http.get(url).timeout(const Duration(seconds: 8), onTimeout: () {
       throw Exception('Slow internet connection, try again later');
@@ -95,7 +98,7 @@ class Orders with ChangeNotifier {
         );
       },
     );
-    _orders = loadedOrders.reversed.toList();
+    orders = loadedOrders.reversed.toList();
     notifyListeners();
   }
 }

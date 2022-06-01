@@ -3,9 +3,9 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class Auth with ChangeNotifier {
-  // String _token;
-  // DateTime _tokenExpiryDate;
-  // String _userId;
+  String? _token;
+  DateTime? _tokenExpiryDate;
+  String? _userId;
 
   Future<void> signup(String email, String password) async {
     return _authenticate(email, password, 'signUp');
@@ -35,8 +35,31 @@ class Auth with ChangeNotifier {
       if (responseData['error'] != null) {
         throw Exception(responseData['error']['message']);
       }
+
+      // storing token received in responseData
+      _token = responseData['idToken'];
+      _userId = responseData['localId'];
+      _tokenExpiryDate = DateTime.now().add(
+        Duration(
+          seconds: int.parse(responseData['expiresIn']),
+        ),
+      );
+      notifyListeners();
     } catch (exception) {
       rethrow;
     }
+  }
+
+  bool get isAuthenticated {
+    return _token != null;
+  }
+
+  String get getToken {
+    if (_tokenExpiryDate != null &&
+        _tokenExpiryDate!.isAfter(DateTime.now()) &&
+        _token != null) {
+      return _token!;
+    }
+    return '';
   }
 }

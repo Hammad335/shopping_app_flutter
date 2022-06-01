@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class Products with ChangeNotifier {
-  List<Product> _items = [
+  List<Product> items = [
     // Product(
     //   id: 'p1',
     //   title: 'Red Shirt',
@@ -40,25 +40,28 @@ class Products with ChangeNotifier {
     //       'https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg',
     // ),
   ];
+  final String? authToken;
+
+  Products({this.authToken, required this.items});
 
   List<Product> get getAllProducts {
-    return [..._items];
+    return [...items];
   }
 
   List<Product> get getFavoriteProducts {
-    return _items.where((product) => product.isFavorite).toList();
+    return items.where((product) => product.isFavorite).toList();
   }
 
   Product getProductById(String id) {
-    return _items.firstWhere((product) => product.id == id);
+    return items.firstWhere((product) => product.id == id);
   }
 
   Future<void> fetchAndSetProducts() async {
-    if (_items.isNotEmpty) {
+    if (items.isNotEmpty) {
       return;
     }
     final url = Uri.parse(
-        'https://shopping-app-flutter-ee2b9-default-rtdb.firebaseio.com/products.json');
+        'https://shopping-app-flutter-ee2b9-default-rtdb.firebaseio.com/products.json?auth=$authToken');
     try {
       final response = await http.get(url).timeout(
             const Duration(seconds: 10),
@@ -81,7 +84,7 @@ class Products with ChangeNotifier {
           ),
         );
       });
-      _items = loadedProducts;
+      items = loadedProducts;
       notifyListeners();
     } on TimeoutException {
       throw Exception('Slow internet connection, try again later');
@@ -93,7 +96,7 @@ class Products with ChangeNotifier {
 
   Future<void> addProduct(Product product) async {
     final url = Uri.parse(
-        'https://shopping-app-flutter-ee2b9-default-rtdb.firebaseio.com/products.json');
+        'https://shopping-app-flutter-ee2b9-default-rtdb.firebaseio.com/products.json?auth=$authToken');
     try {
       final response = await http
           .post(url,
@@ -112,7 +115,7 @@ class Products with ChangeNotifier {
         price: product.price,
         imageUrl: product.imageUrl,
       );
-      _items.insert(0, newProduct);
+      items.insert(0, newProduct);
       notifyListeners();
     } on TimeoutException {
       throw Exception('Slow internet connection, try again later');
@@ -128,11 +131,11 @@ class Products with ChangeNotifier {
 
   Future<void> updateProduct(String productId, Product newProduct) async {
     final oldProductIndex =
-        _items.indexWhere((product) => product.id == productId);
+        items.indexWhere((product) => product.id == productId);
 
     if (oldProductIndex >= 0) {
       final url = Uri.parse(
-          'https://shopping-app-flutter-ee2b9-default-rtdb.firebaseio.com/products/$productId.json');
+          'https://shopping-app-flutter-ee2b9-default-rtdb.firebaseio.com/products/$productId.json?auth=$authToken');
       try {
         await http
             .patch(url,
@@ -143,7 +146,7 @@ class Products with ChangeNotifier {
                   'imageUrl': newProduct.imageUrl,
                 }))
             .timeout(const Duration(seconds: 10));
-        _items[oldProductIndex] = newProduct;
+        items[oldProductIndex] = newProduct;
         notifyListeners();
       } on TimeoutException {
         throw Exception('Slow internet connection, try again later');
@@ -155,7 +158,7 @@ class Products with ChangeNotifier {
 
   Future<void> deleteProduct(String productId) async {
     final url = Uri.parse(
-        'https://shopping-app-flutter-ee2b9-default-rtdb.firebaseio.com/products/$productId.json');
+        'https://shopping-app-flutter-ee2b9-default-rtdb.firebaseio.com/products/$productId.json?auth=$authToken');
 
     try {
       final response =
@@ -164,7 +167,7 @@ class Products with ChangeNotifier {
         throw Exception(
             'Something went wrong try again later. Status Code: ${response.statusCode}');
       }
-      _items.removeWhere((product) => product.id == productId);
+      items.removeWhere((product) => product.id == productId);
     } on TimeoutException {
       throw Exception('Slow internet connection, try again later.');
     } catch (exception) {
