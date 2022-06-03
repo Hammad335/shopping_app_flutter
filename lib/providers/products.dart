@@ -85,6 +85,7 @@ class Products with ChangeNotifier {
         );
       });
       items = loadedProducts;
+      print(items.last.toString());
       notifyListeners();
     } on TimeoutException {
       throw Exception('Slow internet connection, try again later');
