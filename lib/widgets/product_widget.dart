@@ -36,7 +36,7 @@ class ProductWidget extends StatelessWidget {
                 color: Colors.red,
               ),
               onPressed: () {
-                product.toggleFavorite(authData.getToken);
+                product.toggleFavorite(authData.getToken, authData.getUserId);
               },
               color: Theme.of(context).accentColor,
             ),

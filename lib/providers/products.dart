@@ -41,8 +41,9 @@ class Products with ChangeNotifier {
     // ),
   ];
   final String? authToken;
+  final String? userId;
 
-  Products({this.authToken, required this.items});
+  Products({this.authToken, this.userId, required this.items});
 
   List<Product> get getAllProducts {
     return [...items];
@@ -60,7 +61,7 @@ class Products with ChangeNotifier {
     if (items.isNotEmpty) {
       return;
     }
-    final url = Uri.parse(
+    var url = Uri.parse(
         'https://shopping-app-flutter-ee2b9-default-rtdb.firebaseio.com/products.json?auth=$authToken');
     try {
       final response = await http.get(url).timeout(
@@ -70,6 +71,16 @@ class Products with ChangeNotifier {
       if (extractedData == null) {
         return;
       }
+
+      // http requesting again for favorite status
+      url = Uri.parse(
+          'https://shopping-app-flutter-ee2b9-default-rtdb.firebaseio.com/userFavorites/$userId.json?auth=$authToken');
+      final favoriteResponse = await http.get(url);
+      final favoriteData =
+          json.decode(favoriteResponse.body); // key-value pairs
+
+      // var isFav= favoriteData?? false;
+
       final List<Product> loadedProducts = [];
       extractedData.forEach((productId, productData) {
         loadedProducts.insert(
@@ -79,13 +90,14 @@ class Products with ChangeNotifier {
             title: productData['title'],
             description: productData['description'],
             price: productData['price'],
-            isFavorite: productData['isFavorite'],
+            isFavorite:
+                favoriteData == null ? false : favoriteData[productId] ?? false,
             imageUrl: productData['imageUrl'],
           ),
         );
       });
       items = loadedProducts;
-      print(items.last.toString());
+      // print(items.last.toString());
       notifyListeners();
     } on TimeoutException {
       throw Exception('Slow internet connection, try again later');
@@ -106,7 +118,6 @@ class Products with ChangeNotifier {
                 'description': product.description,
                 'imageUrl': product.imageUrl,
                 'price': product.price,
-                'isFavorite': product.isFavorite,
               }))
           .timeout(const Duration(seconds: 10));
       final newProduct = Product(
