@@ -233,8 +233,11 @@ class _AuthCardState extends State<AuthCard> {
             .signup(_authData['email']!, _authData['password']!);
       }
     } catch (exception) {
-      var errorMessage = 'Authentication failed.';
-      if (exception.toString().contains('EMAIL_EXISTS')) {
+      print(exception.toString());
+      var errorMessage = 'Authentication failed, try again later.';
+      if (exception.toString().contains('Slow internet connection')) {
+        errorMessage = exception.toString().split(':').last;
+      } else if (exception.toString().contains('EMAIL_EXISTS')) {
         errorMessage = 'This email address is already in use';
       } else if (exception.toString().contains('INVALID_EMAIL')) {
         errorMessage = 'This is not a valid email address';

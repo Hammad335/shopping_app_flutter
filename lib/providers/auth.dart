@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:async';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Auth with ChangeNotifier {
   String? _token;
@@ -22,16 +23,18 @@ class Auth with ChangeNotifier {
     final url = Uri.parse(
         'https://identitytoolkit.googleapis.com/v1/accounts:$urlSegment?key=AIzaSyB0JdWX7P7s_uTmJ2cNeihc8n9NWGArB9Q');
     try {
-      final response = await http.post(
-        url,
-        body: json.encode(
-          {
-            'email': email,
-            'password': password,
-            'returnSecureToken': true,
-          },
-        ),
-      );
+      final response = await http
+          .post(url,
+              body: json.encode(
+                {
+                  'email': email,
+                  'password': password,
+                  'returnSecureToken': true,
+                },
+              ))
+          .timeout(const Duration(seconds: 8), onTimeout: () {
+        throw Exception('Slow internet connection, try again later.');
+      });
       // manually handling errors of status code less than 200
       final responseData = json.decode(response.body);
       if (responseData['error'] != null) {
@@ -48,6 +51,15 @@ class Auth with ChangeNotifier {
       );
       _autoLogout(); // logout automatically when token expires
       notifyListeners();
+
+      // storing login details using shared preferences
+      final prefs = await SharedPreferences.getInstance();
+      final userData = json.encode({
+        'token': _token,
+        'userId': _userId,
+        'expiryDate': _tokenExpiryDate?.toIso8601String(),
+      });
+      prefs.setString('userData', userData);
     } catch (exception) {
       rethrow;
     }
@@ -70,7 +82,7 @@ class Auth with ChangeNotifier {
     return _userId ?? '';
   }
 
-  void logout() {
+  Future<void> logout() async {
     _token = null;
     _userId = null;
     _tokenExpiryDate = null;
@@ -79,6 +91,10 @@ class Auth with ChangeNotifier {
       _authTimer = null;
     }
     notifyListeners();
+
+    // removing prefs data on logout
+    final prefs = await SharedPreferences.getInstance();
+    prefs.clear();
   }
 
   void _autoLogout() {
@@ -87,5 +103,30 @@ class Auth with ChangeNotifier {
     }
     final timeToExpire = _tokenExpiryDate?.difference(DateTime.now()).inSeconds;
     _authTimer = Timer(Duration(seconds: timeToExpire!), logout);
+  }
+
+  Future<bool> tryAutoLogin() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      if (!prefs.containsKey('userData')) {
+        return false;
+      }
+      final extractedUserData =
+          json.decode(prefs.getString('userData')!) as Map<String, dynamic>;
+      final expiryDate =
+          DateTime.parse(extractedUserData['expiryDate'].toString());
+      if (expiryDate.isBefore(DateTime.now())) {
+        return false;
+      }
+      _token = extractedUserData['token'].toString();
+      _userId = extractedUserData['userId'].toString();
+      _tokenExpiryDate = expiryDate;
+      notifyListeners();
+      _autoLogout();
+      return true;
+    } catch (exception) {
+      print(exception.toString());
+      return false;
+    }
   }
 }

@@ -26,6 +26,7 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
 
   @override
   void initState() {
+    Future.delayed(Duration.zero);
     _fetchAndSetData();
     super.initState();
   }
@@ -92,6 +93,7 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
         _isLoading = false;
       });
     }).catchError((exception) {
+      if (!mounted) return;
       setState(() {
         _isLoading = false;
       });
