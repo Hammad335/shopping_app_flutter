@@ -196,14 +196,16 @@ class _AuthCardState extends State<AuthCard> {
                       ),
                     ),
                   ),
-                FlatButton(
+                ElevatedButton(
                   child: Text(
-                      '${_authMode == AuthMode.Login ? 'SIGNUP' : 'LOGIN'} INSTEAD'),
+                    '${_authMode == AuthMode.Login ? 'SIGNUP' : 'LOGIN'} INSTEAD',
+                    style: TextStyle(color: Theme.of(context).primaryColor),
+                  ),
                   onPressed: _switchAuthMode,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 30.0, vertical: 4),
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  textColor: Theme.of(context).primaryColor,
+                  // padding:
+                  //     const EdgeInsets.symmetric(horizontal: 30.0, vertical: 4),
+                  // materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  // textColor: Theme.of(context).primaryColor,
                 ),
               ],
             ),
