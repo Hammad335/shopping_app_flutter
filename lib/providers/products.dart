@@ -89,7 +89,7 @@ class Products with ChangeNotifier {
             id: productId.toString(),
             title: productData['title'],
             description: productData['description'],
-            price: productData['price'],
+            price: productData['price'].toDouble(),
             isFavorite:
                 favoriteData == null ? false : favoriteData[productId] ?? false,
             imageUrl: productData['imageUrl'],

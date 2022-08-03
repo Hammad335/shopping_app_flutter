@@ -90,7 +90,7 @@ class Orders with ChangeNotifier {
                     id: cartItem['id'],
                     title: cartItem['title'],
                     quantity: cartItem['quantity'],
-                    price: cartItem['price'],
+                    price: cartItem['price'].toDouble(),
                   ),
                 )
                 .toList(),
