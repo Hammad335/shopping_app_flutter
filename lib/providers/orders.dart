@@ -82,7 +82,7 @@ class Orders with ChangeNotifier {
         loadedOrders.add(
           OrderItem(
             orderId: orderId,
-            amount: orderData['amount'],
+            amount: orderData['amount'].toDouble(),
             dateTime: DateTime.parse(orderData['dateTime']),
             cartItems: (orderData['products'] as List<dynamic>)
                 .map(
