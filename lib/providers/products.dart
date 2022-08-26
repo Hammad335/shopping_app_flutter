@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:shopping_app/providers/product.dart';
 import 'package:http/http.dart' as http;
