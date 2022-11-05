@@ -32,7 +32,7 @@ class Auth with ChangeNotifier {
                   'returnSecureToken': true,
                 },
               ))
-          .timeout(const Duration(seconds: 8), onTimeout: () {
+          .timeout(const Duration(seconds: 5), onTimeout: () {
         throw Exception('Slow internet connection, try again later.');
       });
       // manually handling errors of status code less than 200
@@ -128,5 +128,10 @@ class Auth with ChangeNotifier {
       print(exception.toString());
       return false;
     }
+  }
+
+  bool isAdmin() {
+    const String _adminUid = 'I6T2AS4jFkdIJTsPbCEGCKTz54F3';
+    return _userId == _adminUid;
   }
 }

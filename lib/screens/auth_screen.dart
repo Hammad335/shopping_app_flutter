@@ -98,7 +98,7 @@ class _AuthCardState extends State<AuthCard>
     with SingleTickerProviderStateMixin {
   final GlobalKey<FormState> _formKey = GlobalKey();
   AuthMode _authMode = AuthMode.Login;
-  Map<String, String> _authData = {
+  final Map<String, String> _authData = {
     'email': '',
     'password': '',
   };
@@ -171,10 +171,14 @@ class _AuthCardState extends State<AuthCard>
                   validator: (value) {
                     if (value == null ||
                         value.isEmpty ||
-                        !value.contains('@')) {
+                        !value.contains('@gmail.com')) {
                       return 'Invalid email!';
                     }
-                    return null;
+                    if (_authMode == AuthMode.Signup) {
+                      if (value.contains('admin@gmail.com')) {
+                        return 'Invalid email!';
+                      }
+                    }
                     return null;
                   },
                   onSaved: (value) {
@@ -215,6 +219,7 @@ class _AuthCardState extends State<AuthCard>
                                 if (value != _passwordController.text) {
                                   return 'Passwords do not match!';
                                 }
+                                return null;
                               }
                             : null,
                       ),
@@ -290,20 +295,7 @@ class _AuthCardState extends State<AuthCard>
       }
     } catch (exception) {
       print(exception.toString());
-      var errorMessage = 'Authentication failed, try again later.';
-      if (exception.toString().contains('Slow internet connection')) {
-        errorMessage = exception.toString().split(':').last;
-      } else if (exception.toString().contains('EMAIL_EXISTS')) {
-        errorMessage = 'This email address is already in use';
-      } else if (exception.toString().contains('INVALID_EMAIL')) {
-        errorMessage = 'This is not a valid email address';
-      } else if (exception.toString().contains('WEAK_PASSWORD')) {
-        errorMessage = 'This password is too weak';
-      } else if (exception.toString().contains('EMAIL_NOT_FOUND')) {
-        errorMessage = 'User does not exist';
-      } else if (exception.toString().contains('INVALID_PASSWORD')) {
-        errorMessage = 'Invalid password';
-      }
+      var errorMessage = _getErrorMessage(exception);
       _showErrorDialog(errorMessage);
     }
     setState(() {
@@ -325,11 +317,29 @@ class _AuthCardState extends State<AuthCard>
     }
   }
 
+  String _getErrorMessage(Object exception) {
+    var errorMessage = 'Authentication failed, try again later.';
+    if (exception.toString().contains('Slow internet connection')) {
+      errorMessage = exception.toString().split(':').last;
+    } else if (exception.toString().contains('EMAIL_EXISTS')) {
+      errorMessage = 'This email address is already in use';
+    } else if (exception.toString().contains('INVALID_EMAIL')) {
+      errorMessage = 'This is not a valid email address';
+    } else if (exception.toString().contains('WEAK_PASSWORD')) {
+      errorMessage = 'This password is too weak';
+    } else if (exception.toString().contains('EMAIL_NOT_FOUND')) {
+      errorMessage = 'User does not exist';
+    } else if (exception.toString().contains('INVALID_PASSWORD')) {
+      errorMessage = 'Invalid password';
+    }
+    return errorMessage;
+  }
+
   void _showErrorDialog(String errorMessage) {
     showDialog(
         context: context,
         builder: (context) => AlertDialog(
-              title: const Text('An error occured.'),
+              title: const Text('An error occurred.'),
               content: Text(errorMessage),
               actions: <Widget>[
                 ElevatedButton(

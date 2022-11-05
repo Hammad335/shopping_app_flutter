@@ -6,6 +6,7 @@ import 'package:shopping_app/widgets/app_drawer.dart';
 import 'package:shopping_app/widgets/cart_badge.dart';
 import 'package:shopping_app/widgets/product_widget.dart';
 import 'package:provider/provider.dart';
+import '../providers/auth.dart';
 import '../providers/cart.dart';
 
 enum FilterOption {
@@ -36,42 +37,44 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Shop'),
-        actions: <Widget>[
-          Consumer<Cart>(
-            builder: (_, cart, excludedChild) => CartBadge(
-              child: excludedChild!,
-              value: cart.itemCount.toString(),
-            ),
-            child: IconButton(
-              icon: const Icon(Icons.shopping_cart),
-              onPressed: () {
-                Navigator.of(context).pushNamed(CartScreen.routeName);
-              },
-            ),
-          ),
-          PopupMenuButton(
-            itemBuilder: (_) => [
-              const PopupMenuItem(
-                child: Text('Only Favorites'),
-                value: FilterOption.Favorites,
-              ),
-              const PopupMenuItem(
-                child: Text('Show All'),
-                value: FilterOption.All,
-              ),
-            ],
-            icon: const Icon(Icons.more_vert),
-            onSelected: (value) {
-              setState(() {
-                if (value == FilterOption.Favorites) {
-                  _showFavorites = true;
-                } else {
-                  _showFavorites = false;
-                }
-              });
-            },
-          ),
-        ],
+        actions: Provider.of<Auth>(context, listen: false).isAdmin()
+            ? null
+            : [
+                Consumer<Cart>(
+                  builder: (_, cart, excludedChild) => CartBadge(
+                    child: excludedChild!,
+                    value: cart.itemCount.toString(),
+                  ),
+                  child: IconButton(
+                    icon: const Icon(Icons.shopping_cart),
+                    onPressed: () {
+                      Navigator.of(context).pushNamed(CartScreen.routeName);
+                    },
+                  ),
+                ),
+                PopupMenuButton(
+                  itemBuilder: (_) => [
+                    const PopupMenuItem(
+                      child: Text('Only Favorites'),
+                      value: FilterOption.Favorites,
+                    ),
+                    const PopupMenuItem(
+                      child: Text('Show All'),
+                      value: FilterOption.All,
+                    ),
+                  ],
+                  icon: const Icon(Icons.more_vert),
+                  onSelected: (value) {
+                    setState(() {
+                      if (value == FilterOption.Favorites) {
+                        _showFavorites = true;
+                      } else {
+                        _showFavorites = false;
+                      }
+                    });
+                  },
+                ),
+              ],
       ),
       drawer: AppDrawer(),
       body: _isLoading
